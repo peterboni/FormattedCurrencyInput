@@ -46,22 +46,22 @@
     [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
 
     [textFieldStrValue replaceOccurrencesOfString:numberFormatter.currencySymbol
-                       withString:@""
-                       options:NSLiteralSearch
-                       range:NSMakeRange(0, [textFieldStrValue length])];
+                                       withString:@""
+                                          options:NSLiteralSearch
+                                            range:NSMakeRange(0, [textFieldStrValue length])];
     
     [textFieldStrValue replaceOccurrencesOfString:numberFormatter.groupingSeparator
-                       withString:@""
-                       options:NSLiteralSearch
-                       range:NSMakeRange(0, [textFieldStrValue length])];
+                                       withString:@""
+                                          options:NSLiteralSearch
+                                            range:NSMakeRange(0, [textFieldStrValue length])];
 
     NSDecimalNumber *textFieldNum = [NSDecimalNumber decimalNumberWithString:textFieldStrValue];
     
     UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil
-                                              message:[NSString stringWithFormat:@"Value: %@, Number: %@", textFieldStr, textFieldNum]
-                                              delegate:nil
-                                              cancelButtonTitle:@"Ok"
-                                              otherButtonTitles:nil];
+                                                    message:[NSString stringWithFormat:@"Value: %@, Number: %@", textFieldStr, textFieldNum]
+                                                   delegate:nil
+                                          cancelButtonTitle:@"Ok"
+                                          otherButtonTitles:nil];
     [alert show];
 }
 
@@ -78,14 +78,14 @@
         NSMutableString *stringPasted = [NSMutableString stringWithString:stringMaybeChanged];
         
         [stringPasted replaceOccurrencesOfString:numberFormatter.currencySymbol
-                      withString:@""
-                      options:NSLiteralSearch
-                      range:NSMakeRange(0, [stringPasted length])];
+                                      withString:@""
+                                         options:NSLiteralSearch
+                                           range:NSMakeRange(0, [stringPasted length])];
         
         [stringPasted replaceOccurrencesOfString:numberFormatter.groupingSeparator
-                      withString:@""
-                      options:NSLiteralSearch
-                      range:NSMakeRange(0, [stringPasted length])];
+                                      withString:@""
+                                         options:NSLiteralSearch
+                                           range:NSMakeRange(0, [stringPasted length])];
         
         NSDecimalNumber *numberPasted = [NSDecimalNumber decimalNumberWithString:stringPasted];
         stringMaybeChanged = [numberFormatter stringFromNumber:numberPasted];
@@ -100,19 +100,19 @@
     [textFieldTextStr replaceCharactersInRange:range withString:stringMaybeChanged];
     
     [textFieldTextStr replaceOccurrencesOfString:numberFormatter.currencySymbol
-                      withString:@""
-                      options:NSLiteralSearch
-                      range:NSMakeRange(0, [textFieldTextStr length])];
+                                      withString:@""
+                                         options:NSLiteralSearch
+                                           range:NSMakeRange(0, [textFieldTextStr length])];
     
     [textFieldTextStr replaceOccurrencesOfString:numberFormatter.groupingSeparator
-                      withString:@""
-                      options:NSLiteralSearch
-                      range:NSMakeRange(0, [textFieldTextStr length])];
+                                      withString:@""
+                                         options:NSLiteralSearch
+                                           range:NSMakeRange(0, [textFieldTextStr length])];
     
     [textFieldTextStr replaceOccurrencesOfString:numberFormatter.decimalSeparator
-                      withString:@""
-                      options:NSLiteralSearch
-                      range:NSMakeRange(0, [textFieldTextStr length])];
+                                      withString:@""
+                                         options:NSLiteralSearch
+                                           range:NSMakeRange(0, [textFieldTextStr length])];
     
     if (textFieldTextStr.length <= MAX_DIGITS)
     {
