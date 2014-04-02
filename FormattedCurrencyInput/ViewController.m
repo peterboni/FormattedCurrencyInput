@@ -70,7 +70,7 @@
 
 - (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string
 {
-    int MAX_DIGITS = 11; // $999,999,999.99
+    NSInteger MAX_DIGITS = 11; // $999,999,999.99
     
     NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
     [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
@@ -130,8 +130,8 @@
         
         if (cursorOffset != textFieldTextStrLength)
         {
-            int lengthDelta = textFieldTextNewStr.length - textFieldTextStrLength;
-            int newCursorOffset = MAX(0, MIN(textFieldTextNewStr.length, cursorOffset + lengthDelta));
+            NSInteger lengthDelta = textFieldTextNewStr.length - textFieldTextStrLength;
+            NSInteger newCursorOffset = MAX(0, MIN(textFieldTextNewStr.length, cursorOffset + lengthDelta));
             UITextPosition* newPosition = [textField positionFromPosition:textField.beginningOfDocument offset:newCursorOffset];
             UITextRange* newRange = [textField textRangeFromPosition:newPosition toPosition:newPosition];
             [textField setSelectedTextRange:newRange];
