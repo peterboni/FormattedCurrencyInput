@@ -23,6 +23,9 @@
     
     NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
     [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+    [numberFormatter setMaximumFractionDigits:2];
+    [numberFormatter setMinimumFractionDigits:2];
+    
     _textField.text = [numberFormatter stringFromNumber:[NSNumber numberWithInt:0]];
 }
 
@@ -71,6 +74,8 @@
     
     NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
     [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+    [numberFormatter setMaximumFractionDigits:2];
+    [numberFormatter setMinimumFractionDigits:2];
     
     NSString *stringMaybeChanged = [NSString stringWithString:string];
     if (stringMaybeChanged.length > 1)
