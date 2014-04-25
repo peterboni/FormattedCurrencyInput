@@ -23,6 +23,9 @@
     
     NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
     [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+    [numberFormatter setMaximumFractionDigits:2];
+    [numberFormatter setMinimumFractionDigits:2];
+    
     _textField.text = [numberFormatter stringFromNumber:[NSNumber numberWithInt:0]];
 }
 
@@ -67,10 +70,12 @@
 
 - (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string
 {
-    int MAX_DIGITS = 11; // $999,999,999.99
+    NSInteger MAX_DIGITS = 11; // $999,999,999.99
     
     NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
     [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+    [numberFormatter setMaximumFractionDigits:2];
+    [numberFormatter setMinimumFractionDigits:2];
     
     NSString *stringMaybeChanged = [NSString stringWithString:string];
     if (stringMaybeChanged.length > 1)
@@ -125,8 +130,8 @@
         
         if (cursorOffset != textFieldTextStrLength)
         {
-            int lengthDelta = textFieldTextNewStr.length - textFieldTextStrLength;
-            int newCursorOffset = MAX(0, MIN(textFieldTextNewStr.length, cursorOffset + lengthDelta));
+            NSInteger lengthDelta = textFieldTextNewStr.length - textFieldTextStrLength;
+            NSInteger newCursorOffset = MAX(0, MIN(textFieldTextNewStr.length, cursorOffset + lengthDelta));
             UITextPosition* newPosition = [textField positionFromPosition:textField.beginningOfDocument offset:newCursorOffset];
             UITextRange* newRange = [textField textRangeFromPosition:newPosition toPosition:newPosition];
             [textField setSelectedTextRange:newRange];
