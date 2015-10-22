@@ -123,8 +123,12 @@
     {
         NSDecimalNumber *textFieldTextNum = [NSDecimalNumber decimalNumberWithString:textFieldTextStr];
         NSDecimalNumber *divideByNum = [[[NSDecimalNumber alloc] initWithInt:10] decimalNumberByRaisingToPower:numberFormatter.maximumFractionDigits];
-        NSDecimalNumber *textFieldTextNewNum = [textFieldTextNum decimalNumberByDividingBy:divideByNum];
-        NSString *textFieldTextNewStr = [numberFormatter stringFromNumber:textFieldTextNewNum];
+        NSString *textFieldTextNewStr;
+        
+        if (!isnan(textFieldTextNum.doubleValue)) {
+            NSDecimalNumber *textFieldTextNewNum = [textFieldTextNum decimalNumberByDividingBy:divideByNum];
+            textFieldTextNewStr = [numberFormatter stringFromNumber:textFieldTextNewNum];
+        }
         
         textField.text = textFieldTextNewStr;
         
