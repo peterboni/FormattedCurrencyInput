@@ -8,7 +8,22 @@
 
 #import "ViewController.h"
 
-@interface ViewController ()
+static NSUInteger const kMaxLength = 11;
+
+typedef NS_ENUM(NSUInteger, InputType) {
+    InputTypeRegular,
+    InputTypeSuffix
+};
+
+@interface ViewController ()<UITextFieldDelegate>
+
+@property (nonatomic, weak) IBOutlet UITextField *textField;
+@property (nonatomic, weak) IBOutlet UITextField *suffixField;
+
+@property (nonatomic, strong) NSNumberFormatter *regularFormatter;
+@property (nonatomic, strong) NSNumberFormatter *suffixFormatter;
+
+- (IBAction)valueButton:(id)sender;
 
 @end
 
@@ -16,52 +31,87 @@
 
 @synthesize textField = _textField;
 
+#pragma mark - View Life Cycle
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	_textField.delegate = self;
     
-    NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
-    [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-    [numberFormatter setMaximumFractionDigits:2];
-    [numberFormatter setMinimumFractionDigits:2];
-    
-    _textField.text = [numberFormatter stringFromNumber:[NSNumber numberWithInt:0]];
+    self.textField.text = [self.regularFormatter stringFromNumber:@0];
+    self.suffixField.text = [self.suffixFormatter stringFromNumber:@0];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
     [self.textField becomeFirstResponder];
 }
 
-- (void)didReceiveMemoryWarning
+#pragma mark - Accessors
+- (NSNumberFormatter *) regularFormatter
 {
-    [super didReceiveMemoryWarning];
+    if (_regularFormatter)
+    {
+        return _regularFormatter;
+    }
+    
+    _regularFormatter = [[NSNumberFormatter alloc] init];
+    _regularFormatter.numberStyle = NSNumberFormatterCurrencyStyle;
+    _regularFormatter.maximumFractionDigits = 2;
+    _regularFormatter.minimumFractionDigits = 2;
+    
+    return _regularFormatter;
 }
 
+- (NSNumberFormatter *) suffixFormatter
+{
+    if (_suffixFormatter)
+    {
+        return _suffixFormatter;
+    }
+    
+    _suffixFormatter = [[NSNumberFormatter alloc] init];
+    _suffixFormatter.numberStyle = NSNumberFormatterCurrencyStyle;
+    _suffixFormatter.positiveFormat = @"#,##0.00¤";
+    _suffixFormatter.negativeFormat = @"(#,##0.00¤";
+    _suffixFormatter.currencySymbol = @"YTL";
+    
+    return _suffixFormatter;
+}
+
+#pragma mark - private
+- (NSString *) valueFromString:(NSString *)string
+{
+    NSCharacterSet *valueSet= [[NSCharacterSet characterSetWithCharactersInString:@"0123456789,."] invertedSet];
+    return [[[string componentsSeparatedByCharactersInSet:valueSet] componentsJoinedByString:@""] mutableCopy];
+}
+
+- (NSString *) numberFromString:(NSString *)string
+{
+    NSCharacterSet *numberSet = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789"] invertedSet];
+    return [[[string componentsSeparatedByCharactersInSet:numberSet] componentsJoinedByString:@""] mutableCopy];
+}
+
+- (NSDecimalNumber *) dividerForFormatter:(NSNumberFormatter *)formatter
+{
+    return [[[NSDecimalNumber alloc] initWithInt:10] decimalNumberByRaisingToPower:formatter.maximumFractionDigits];
+}
+
+- (NSString *) alertTextForField:(UITextField *)field formatter:(NSNumberFormatter *)formatter
+{
+    NSDecimalNumber *textFieldNum = [NSDecimalNumber decimalNumberWithString:[self numberFromString:field.text]];
+    textFieldNum = [textFieldNum decimalNumberByDividingBy:[self dividerForFormatter:formatter]];
+    return [NSString stringWithFormat:@"Value:%@\nNumber:%@", field.text, textFieldNum];
+}
+
+#pragma mark - Action
 - (IBAction)valueButton:(id)sender
 {
-    NSString *textFieldStr = [NSString stringWithFormat:@"%@", _textField.text];
-    
-    NSMutableString *textFieldStrValue = [NSMutableString stringWithString:textFieldStr];
-    
-    NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
-    [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-
-    [textFieldStrValue replaceOccurrencesOfString:numberFormatter.currencySymbol
-                                       withString:@""
-                                          options:NSLiteralSearch
-                                            range:NSMakeRange(0, [textFieldStrValue length])];
-    
-    [textFieldStrValue replaceOccurrencesOfString:numberFormatter.groupingSeparator
-                                       withString:@""
-                                          options:NSLiteralSearch
-                                            range:NSMakeRange(0, [textFieldStrValue length])];
-
-    NSDecimalNumber *textFieldNum = [NSDecimalNumber decimalNumberWithString:textFieldStrValue];
+    NSString *regular = [self alertTextForField:self.textField formatter:self.regularFormatter];
+    NSString *suffix = [self alertTextForField:self.suffixField formatter:self.suffixFormatter];
+    NSString *message = [NSString stringWithFormat:@"Regular\n%@\n\nSuffix\n%@", regular, suffix];
     
     UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil
-                                                    message:[NSString stringWithFormat:@"Value: %@, Number: %@", textFieldStr, textFieldNum]
+                                                    message:message
                                                    delegate:nil
                                           cancelButtonTitle:@"Ok"
                                           otherButtonTitles:nil];
@@ -70,30 +120,24 @@
 
 - (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string
 {
-    NSInteger MAX_DIGITS = 11; // $999,999,999.99
+    NSNumberFormatter *formatter;
     
-    NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
-    [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-    [numberFormatter setMaximumFractionDigits:2];
-    [numberFormatter setMinimumFractionDigits:2];
+    if (textField.tag == InputTypeSuffix)
+    {
+        formatter = self.suffixFormatter;
+    }
+    else
+    {
+        formatter = self.regularFormatter;
+    }
     
     NSString *stringMaybeChanged = [NSString stringWithString:string];
     if (stringMaybeChanged.length > 1)
     {
         NSMutableString *stringPasted = [NSMutableString stringWithString:stringMaybeChanged];
-        
-        [stringPasted replaceOccurrencesOfString:numberFormatter.currencySymbol
-                                      withString:@""
-                                         options:NSLiteralSearch
-                                           range:NSMakeRange(0, [stringPasted length])];
-        
-        [stringPasted replaceOccurrencesOfString:numberFormatter.groupingSeparator
-                                      withString:@""
-                                         options:NSLiteralSearch
-                                           range:NSMakeRange(0, [stringPasted length])];
-        
+        stringPasted = [[self numberFromString:stringPasted] mutableCopy];
         NSDecimalNumber *numberPasted = [NSDecimalNumber decimalNumberWithString:stringPasted];
-        stringMaybeChanged = [numberFormatter stringFromNumber:numberPasted];
+        stringMaybeChanged = [formatter stringFromNumber:numberPasted];
     }
     
     UITextRange *selectedRange = [textField selectedTextRange];
@@ -102,29 +146,25 @@
     NSMutableString *textFieldTextStr = [NSMutableString stringWithString:textField.text];
     NSUInteger textFieldTextStrLength = textFieldTextStr.length;
     
+    NSUInteger originalLength = textFieldTextStr.length;
+    textFieldTextStr = [[self valueFromString:textFieldTextStr] mutableCopy];
+    NSUInteger newLength = textFieldTextStr.length;
+    range.location += newLength - originalLength;
+    
     [textFieldTextStr replaceCharactersInRange:range withString:stringMaybeChanged];
+    textFieldTextStr = [[self numberFromString:textFieldTextStr] mutableCopy];
     
-    [textFieldTextStr replaceOccurrencesOfString:numberFormatter.currencySymbol
-                                      withString:@""
-                                         options:NSLiteralSearch
-                                           range:NSMakeRange(0, [textFieldTextStr length])];
-    
-    [textFieldTextStr replaceOccurrencesOfString:numberFormatter.groupingSeparator
-                                      withString:@""
-                                         options:NSLiteralSearch
-                                           range:NSMakeRange(0, [textFieldTextStr length])];
-    
-    [textFieldTextStr replaceOccurrencesOfString:numberFormatter.decimalSeparator
-                                      withString:@""
-                                         options:NSLiteralSearch
-                                           range:NSMakeRange(0, [textFieldTextStr length])];
-    
-    if (textFieldTextStr.length <= MAX_DIGITS)
+    if (textFieldTextStr.length <= kMaxLength)
     {
         NSDecimalNumber *textFieldTextNum = [NSDecimalNumber decimalNumberWithString:textFieldTextStr];
-        NSDecimalNumber *divideByNum = [[[NSDecimalNumber alloc] initWithInt:10] decimalNumberByRaisingToPower:numberFormatter.maximumFractionDigits];
-        NSDecimalNumber *textFieldTextNewNum = [textFieldTextNum decimalNumberByDividingBy:divideByNum];
-        NSString *textFieldTextNewStr = [numberFormatter stringFromNumber:textFieldTextNewNum];
+        NSDecimalNumber *divideByNum = [self dividerForFormatter:formatter];
+        NSString *textFieldTextNewStr;
+        
+        if (!isnan(textFieldTextNum.doubleValue))
+        {
+            NSDecimalNumber *textFieldTextNewNum = [textFieldTextNum decimalNumberByDividingBy:divideByNum];
+            textFieldTextNewStr = [formatter stringFromNumber:textFieldTextNewNum];
+        }
         
         textField.text = textFieldTextNewStr;
         
